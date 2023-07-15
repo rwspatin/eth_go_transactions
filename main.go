@@ -1,28 +1,26 @@
 package main
 
 import(
-	"context"
+	// "context"
 	"fmt"
 	"log"
 
-	"github.com/ethereum/go-ethereum/common" //install packages with go get 'url'
-	"github.com/ethereum/go-ethereum/ethclient"
+	// "github.com/ethereum/go-ethereum/common" //install packages with go get 'url'
+	// "github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 func main(){
-	cnn, err := ethclient.Dial("")
-	
+	privateKey, err := crypto.GenerateKey()
+
 	if err != nil{
-		log.Fatal("Failed to connect", err)
+		log.Fatal("Unable to generate key")
 	}
 
-	cntx := context.Background()
+	privateKeyBytes := crypto.FromECDSA(privateKey)
+	
+	walletAdd := hexutil.Encode(privateKeyBytes)
 
-	txn, pending, _ := cnn.TransactionByHash(cntx, common.HexToHash("0xab313b0172492446df5704fa97d008478a31e6088d970bb81ae75bee5fc20683"))
-
-	if pending {
-		fmt.Println("Txn is pending", txn)
-	} else{
-		fmt.Println("Txn is not pending", txn)
-	}
+	fmt.Println(walletAdd)
 }
