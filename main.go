@@ -4,32 +4,46 @@ import(
 	"context"
 	"fmt"
 	"log"
-	"regexp"
+	"math/big"
 
-	"github.com/ethereum/go-ethereum/common" //install packages with go get 'url'
-	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/ethclient" //install packages with go get 'url'
+	
 )
 
 func main(){
-	regExpression := regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
-
-	fmt.Println("This is a valid address", regExpression.MatchString("0xF17d119eFFA0dCbe24D3fA346860be851150358F"))
-
 	cnn, err := ethclient.Dial("")
 
 	if err != nil{
 		log.Fatal("Failed to connect", err)
 	}
 
-	address := common.HexToAddress("0xF17d119eFFA0dCbe24D3fA346860be851150358F")
-
-	byteCode, err := cnn.CodeAt(context.Background(), address, nil)
+	header, err := cnn.HeaderByNumber(context.Background(), nil)
 
 	if err != nil{
-		log.Fatal("Unable to check the address", address, err)
+		log.Fatal("Unable to get header", err)
 	}
 
-	isContract := len(byteCode) > 0
+	fmt.Println(header.Number.String())
 
-	fmt.Println(address, "Is contract?", isContract)
+	blockNumber := big.NewInt(5231314)
+	block, err := cnn.BlockByNumber(context.Background(), blockNumber)
+
+	if err != nil {
+		log.Fatal("Unable to get the block by number", blockNumber)
+	}
+
+	fmt.Println(block.Number().Uint64())
+	fmt.Println(block.Time())
+	fmt.Println(block.Difficulty())
+	fmt.Println(block.Hash().Hex())
+	fmt.Println(len(block.Transactions()))
+
+	for _, tx := range block.Transactions() {
+		if tx.Value().String() != "0" {
+			fmt.Println(tx.Hash().Hex())
+			fmt.Println(tx.Value().String())
+			fmt.Println(tx.Nonce())
+			fmt.Println(tx.To().Hex())
+		}
+	}
 }
